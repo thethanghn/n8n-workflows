@@ -1,0 +1,74 @@
+{
+  "id": 2,
+  "name": "Get data from Redis",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "id": "b07ef335-8d94-49e2-a9b9-4ac2eae29272"
+    },
+    {
+      "parameters": {
+        "content": "## 👇 Get started faster \nLightning tour of the key concepts \n\n[![n8n quickstart video](/static/quickstart_thumbnail.png#full-width)](https://www.youtube.com/watch?v=RpjQTGKm-ok)",
+        "height": 300,
+        "width": 380
+      },
+      "name": "_QUICKSTART_NOTE_",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        200
+      ],
+      "id": "cebba1c3-0418-4a48-97c5-4155539529fc"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "items",
+        "key": "news",
+        "options": {}
+      },
+      "name": "Redis",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ],
+      "credentials": {
+        "redis": {
+          "id": "1",
+          "name": "Redis account"
+        }
+      },
+      "id": "9fbd2ccc-aa4c-478e-90d6-3064fd1383a4"
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-08-31T11:56:20.995Z",
+  "updatedAt": "2022-08-31T12:02:31.428Z",
+  "settings": {},
+  "staticData": null,
+  "pinData": null,
+  "tags": []
+}
