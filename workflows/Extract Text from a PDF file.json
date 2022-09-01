@@ -1,0 +1,77 @@
+{
+  "id": 3,
+  "name": "Extract Text from a PDF file",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "position": [
+        220,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "812a7686-6a0d-45d7-a2e4-c43039f13f86"
+    },
+    {
+      "parameters": {},
+      "name": "Read PDF",
+      "type": "n8n-nodes-base.readPDF",
+      "position": [
+        660,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "1bf07da2-fc8c-4fa4-acfb-2b7aeb4f63c8"
+    },
+    {
+      "parameters": {
+        "filePath": "/private/tmp/test.pdf"
+      },
+      "name": "Read Binary File1",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ],
+      "id": "a2148d36-d9aa-45cb-914a-52e1c7e66d99"
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Read Binary File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Binary File1": {
+      "main": [
+        [
+          {
+            "node": "Read PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read PDF": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "createdAt": "2022-09-01T05:54:12.843Z",
+  "updatedAt": "2022-09-01T05:54:12.843Z",
+  "settings": {},
+  "staticData": null,
+  "pinData": null,
+  "tags": []
+}
