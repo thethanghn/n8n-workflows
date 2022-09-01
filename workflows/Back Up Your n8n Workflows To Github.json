@@ -11,7 +11,8 @@
         240,
         300
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "2798d936-e742-4d37-ac2a-22ebf242f6c7"
     },
     {
       "parameters": {},
@@ -21,7 +22,8 @@
         1900,
         420
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "0c9059b6-a6cc-4f52-b621-4fb8f25a81cb"
     },
     {
       "parameters": {
@@ -49,7 +51,8 @@
         2200,
         420
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "384f7893-90f5-453a-897d-cdd60c1a6a65"
     },
     {
       "parameters": {},
@@ -59,7 +62,8 @@
         2400,
         240
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "7fe302c9-69b0-4c97-9ed2-6e378a652247"
     },
     {
       "parameters": {},
@@ -69,7 +73,8 @@
         2400,
         420
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "87e5a717-9a8e-4717-9ea6-b9e6d12cf08a"
     },
     {
       "parameters": {},
@@ -79,7 +84,8 @@
         2400,
         580
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "c1c9ad9c-ccd8-4bcf-98d2-267f7fedfed1"
     },
     {
       "parameters": {
@@ -98,10 +104,11 @@
         420
       ],
       "typeVersion": 1,
+      "id": "9bb92059-998a-43c6-bd05-8ce0069d169a",
       "credentials": {
         "githubApi": {
-          "id": "18",
-          "name": "GitHub"
+          "id": "3",
+          "name": "GitHub account"
         }
       }
     },
@@ -121,10 +128,11 @@
         580
       ],
       "typeVersion": 1,
+      "id": "338768fd-5856-45e1-bdff-9cc63abdf1a9",
       "credentials": {
         "githubApi": {
-          "id": "18",
-          "name": "GitHub"
+          "id": "3",
+          "name": "GitHub account"
         }
       }
     },
@@ -138,7 +146,8 @@
         2060,
         420
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "5f7ca7f7-bf69-440e-ac93-e08814c6948c"
     },
     {
       "parameters": {
@@ -156,7 +165,8 @@
         240,
         580
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "0140784d-9d9d-4654-9eb1-306caf04e763"
     },
     {
       "parameters": {
@@ -168,7 +178,8 @@
         1300,
         440
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "e23e4247-1ca6-4f6f-a459-c5236ccb3c78"
     },
     {
       "parameters": {
@@ -181,7 +192,8 @@
         1500,
         440
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "0d5041fe-b79c-428f-983f-77220dff7275"
     },
     {
       "parameters": {
@@ -189,11 +201,11 @@
           "string": [
             {
               "name": "repo.owner",
-              "value": "n8n"
+              "value": "thethanghn"
             },
             {
               "name": "repo.name",
-              "value": "backups"
+              "value": "n8n-workflows"
             },
             {
               "name": "repo.path",
@@ -213,7 +225,8 @@
         400,
         440
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "16a4e6c7-1935-4722-8d02-451ba90f7e10"
     },
     {
       "parameters": {
@@ -225,7 +238,8 @@
         560,
         440
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "b37ae188-6ee7-4dea-9997-5757a487354d"
     },
     {
       "parameters": {
@@ -237,7 +251,8 @@
         740,
         440
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "03f50403-3e29-4e4f-a47c-58349f464cc6"
     },
     {
       "parameters": {
@@ -249,7 +264,8 @@
         920,
         440
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "b907d698-869c-42ca-8594-7793f2014f97"
     },
     {
       "parameters": {
@@ -262,7 +278,8 @@
         1100,
         440
       ],
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "d274d5c4-f2e6-4deb-b74c-ba2c547e23fd"
     },
     {
       "parameters": {
@@ -282,10 +299,11 @@
       ],
       "typeVersion": 1,
       "alwaysOutputData": true,
+      "id": "31a8177b-2cdb-4b41-821f-484d103c6900",
       "credentials": {
         "githubApi": {
-          "id": "18",
-          "name": "GitHub"
+          "id": "3",
+          "name": "GitHub account"
         }
       },
       "continueOnFail": true
@@ -511,9 +529,9 @@
     }
   },
   "createdAt": "2022-09-01T06:42:50.621Z",
-  "updatedAt": "2022-09-01T06:42:50.621Z",
+  "updatedAt": "2022-09-01T06:47:02.287Z",
   "settings": {},
   "staticData": null,
-  "pinData": null,
+  "pinData": {},
   "tags": []
 }
