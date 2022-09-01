@@ -1,0 +1,325 @@
+{
+  "id": 1,
+  "name": "Create an RSS feed based on a website's content",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "position": [
+        240,
+        500
+      ],
+      "typeVersion": 1,
+      "id": "c66045c8-702e-4d41-9388-3e0277fe82e3"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "post",
+        "options": {}
+      },
+      "name": "Item Lists",
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        1340,
+        500
+      ],
+      "typeVersion": 1,
+      "id": "7c8167ee-33f1-43a3-bf27-e5a694e2ad3f"
+    },
+    {
+      "parameters": {
+        "extractionValues": {
+          "values": [
+            {
+              "key": "post",
+              "cssSelector": ".re__srp-list .js__card",
+              "returnValue": "html",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Extract Posts",
+      "type": "n8n-nodes-base.htmlExtract",
+      "position": [
+        1120,
+        500
+      ],
+      "typeVersion": 1,
+      "id": "3f336421-de6a-4091-8fac-3f01f636cf10"
+    },
+    {
+      "parameters": {
+        "url": "={{$json[\"base_domain\"]}}/ban-dat-tp-hcm/dt-tu-100m2-den-150m2?cIds=41",
+        "allowUnauthorizedCerts": true,
+        "responseFormat": "string",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "name": "Fetch Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        900,
+        500
+      ],
+      "typeVersion": 1,
+      "id": "05253e82-0754-425f-b5d1-ac8edd4fbac3"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "base_domain",
+              "value": "https://batdongsan.com.vn"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set URL",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        680,
+        500
+      ],
+      "typeVersion": 1,
+      "id": "f6f5f1a4-d4b6-4936-a9af-ec8748398296"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "link",
+              "value": "={{$item(0).$node[\"Set URL\"].json[\"base_domain\"]}}{{$json[\"link\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Complete Link",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        460,
+        700
+      ],
+      "typeVersion": 1,
+      "id": "6be16512-97f4-4d8f-9e70-e0012340698d"
+    },
+    {
+      "parameters": {
+        "dataPropertyName": "post",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "date",
+              "cssSelector": ".re__card-published-info-published-at",
+              "returnValue": "attribute",
+              "attribute": "aria-label"
+            },
+            {
+              "key": "title",
+              "cssSelector": ".re__card-title"
+            },
+            {
+              "key": "link",
+              "cssSelector": "a.js__product-link-for-product-id",
+              "returnValue": "attribute",
+              "attribute": "href"
+            },
+            {
+              "key": "description",
+              "cssSelector": ".js__card-description"
+            },
+            {
+              "key": "image",
+              "cssSelector": ".re__card-image  > img",
+              "returnValue": "attribute",
+              "attribute": "src"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Extract Fields",
+      "type": "n8n-nodes-base.htmlExtract",
+      "position": [
+        1560,
+        500
+      ],
+      "typeVersion": 1,
+      "id": "e6780ed9-2e36-441a-9ea1-2a657bc553d9"
+    },
+    {
+      "parameters": {
+        "value": "26/08/2022",
+        "dataPropertyName": "date",
+        "custom": true,
+        "toFormat": "EEE, d MMM yyyy HH:mm:ss Z",
+        "options": {
+          "fromFormat": "DD/MM/YYYY"
+        }
+      },
+      "name": "Date & Time",
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 1,
+      "position": [
+        680,
+        700
+      ],
+      "id": "56f21f3e-0bbb-4054-9714-d5c14c5801cb"
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        }
+      },
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ],
+      "id": "7e211fc3-e2a1-4774-9e9a-19fdda68a2b8"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "news",
+        "value": "json"
+      },
+      "name": "Redis",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        980,
+        700
+      ],
+      "credentials": {
+        "redis": {
+          "id": "1",
+          "name": "Redis account"
+        }
+      },
+      "id": "bb1d37a7-8898-40c1-abce-2539491bcaf4"
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Set URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set URL": {
+      "main": [
+        [
+          {
+            "node": "Fetch Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Item Lists": {
+      "main": [
+        [
+          {
+            "node": "Extract Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complete Link": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Posts": {
+      "main": [
+        [
+          {
+            "node": "Item Lists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Website": {
+      "main": [
+        [
+          {
+            "node": "Extract Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Fields": {
+      "main": [
+        [
+          {
+            "node": "Complete Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron": {
+      "main": [
+        [
+          {
+            "node": "Set URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-08-30T15:10:57.410Z",
+  "updatedAt": "2022-08-31T12:01:49.719Z",
+  "settings": {},
+  "staticData": null,
+  "pinData": null,
+  "tags": []
+}
