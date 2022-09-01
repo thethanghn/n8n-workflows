@@ -1,0 +1,206 @@
+{
+  "id": 5,
+  "name": "Message When Content of a Website Changes (Telegram)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://news.ycombinator.com/",
+        "responseFormat": "string",
+        "options": {}
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        640,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "cc553c71-ec7e-4b93-b277-e43aab1a34b1"
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "minutes"
+      },
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        800,
+        300
+      ],
+      "webhookId": "e5f84b2f-2568-4f5b-a72b-ed54838c768b",
+      "typeVersion": 1,
+      "id": "1d34de59-231a-4fb9-aead-c477ccb5be81"
+    },
+    {
+      "parameters": {
+        "url": "https://news.ycombinator.com/",
+        "responseFormat": "string",
+        "options": {}
+      },
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1000,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "7e9fd24d-5e2f-491a-8ff8-63980554c9e9"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$node[\"HTTP Request\"].json[\"data\"]}} {{$node[\"HTTP Request\"].json[\"data\"]}}",
+              "value2": "="
+            }
+          ]
+        }
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1220,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "843cf101-76f8-4814-a99e-0f521f48eb78"
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        }
+      },
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "position": [
+        440,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "c10196c1-9d54-468b-9074-486b82a173b5"
+    },
+    {
+      "parameters": {
+        "chatId": "1234",
+        "text": "Something got changed",
+        "additionalFields": {}
+      },
+      "name": "Telegram1",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1440,
+        380
+      ],
+      "typeVersion": 1,
+      "id": "db16175e-9d9a-42e8-be4e-e7a70993ba16",
+      "credentials": {
+        "telegramApi": {
+          "id": "4",
+          "name": "n8n test bot"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "name": "NoOp",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        1440,
+        180
+      ],
+      "typeVersion": 1,
+      "id": "775ec225-3d2f-485b-bbc9-6642866c1828"
+    },
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "id": "d53af382-2637-4b56-ad9e-6eb040292718"
+    }
+  ],
+  "connections": {
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "NoOp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-09-01T06:47:17.776Z",
+  "updatedAt": "2022-09-01T06:47:17.776Z",
+  "settings": {},
+  "staticData": null,
+  "pinData": {},
+  "tags": []
+}
