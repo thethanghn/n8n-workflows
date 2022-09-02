@@ -1,0 +1,158 @@
+{
+  "id": 8,
+  "name": "Notify via Emails when get new resume",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "position": [
+        240,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "a0fa29f6-afea-4356-add2-dc1b04a05e18",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mailbox": "Inbox",
+        "format": "resolved",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "name": "Check for new emails",
+      "type": "n8n-nodes-base.emailReadImap",
+      "position": [
+        320,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "87b0fda3-2696-42e2-9df3-7e70be9f5842",
+      "credentials": {
+        "imap": {
+          "id": "7",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"text\"].toLowerCase()}}",
+              "operation": "contains",
+              "value2": "resume"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "name": "If email body contains invoice",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        520,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "4300f3ae-630c-4d63-a371-7cd9b6d54b48"
+    },
+    {
+      "parameters": {
+        "fromEmail": "thethang85@gmail.com",
+        "toEmail": "justin.ntt@gmail.com",
+        "subject": "We got a new resume ",
+        "text": "=Hi,\n\nThere is a new resume with following info:\n- Name: {{$json[\"document\"][\"inference\"][\"prediction\"][\"fullname\"][\"values\"][0][\"content\"]}} {{$json[\"document\"][\"inference\"][\"prediction\"][\"fullname\"][\"values\"][1][\"content\"]}} {{$json[\"document\"][\"inference\"][\"prediction\"][\"fullname\"][\"values\"][2][\"content\"]}}\n- Email: {{$json[\"document\"][\"inference\"][\"prediction\"][\"email\"][\"values\"][0][\"content\"]}}\n~ n8n workflow",
+        "attachments": "attachment_0",
+        "options": {}
+      },
+      "name": "Send email to finance manager",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [
+        980,
+        460
+      ],
+      "typeVersion": 1,
+      "id": "a5a8b8a0-0528-4566-b05e-d6c0c5cf4e69",
+      "credentials": {
+        "smtp": {
+          "id": "9",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mindeeInvoiceApi",
+        "requestMethod": "POST",
+        "url": "https://api.mindee.net/v1/products/thethanghn/resume/v1/predict",
+        "allowUnauthorizedCerts": true,
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "multipart-form-data"
+        },
+        "sendBinaryData": true,
+        "binaryPropertyName": "document:attachment_0"
+      },
+      "id": "bcce96d9-579d-43c7-89c3-6b3c136bc0ba",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        760,
+        460
+      ],
+      "credentials": {
+        "mindeeInvoiceApi": {
+          "id": "8",
+          "name": "Mindee Invoice account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Check for new emails": {
+      "main": [
+        [
+          {
+            "node": "If email body contains invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If email body contains invoice": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send email to finance manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-09-01T13:14:28.133Z",
+  "updatedAt": "2022-09-01T13:34:50.558Z",
+  "settings": {},
+  "staticData": null,
+  "pinData": {},
+  "tags": []
+}
