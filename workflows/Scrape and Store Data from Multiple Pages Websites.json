@@ -1,0 +1,687 @@
+{
+  "id": 7,
+  "name": "Scrape and Store Data from Multiple Pages Websites",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "position": [
+        240,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "4cce4622-f69b-4106-81c0-1470d72a098b"
+    },
+    {
+      "parameters": {
+        "url": "https://www.theswiftcodes.com/browse-by-country/",
+        "responseFormat": "string",
+        "options": {}
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        700,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "6d212c1c-1758-47a9-b20d-c0d8dcefe876"
+    },
+    {
+      "parameters": {
+        "extractionValues": {
+          "values": [
+            {
+              "key": "countries",
+              "cssSelector": "ol > li > a",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "HTML Extract",
+      "type": "n8n-nodes-base.htmlExtract",
+      "position": [
+        890,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "c84530b9-74b6-40a3-a8bb-e15eee6b68cd"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {
+          "reset": false
+        }
+      },
+      "name": "SplitInBatches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        1290,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "8d953b8f-ab99-4d1f-831a-9b14aee109e5"
+    },
+    {
+      "parameters": {
+        "url": "={{$node[\"Set\"].json[\"url\"]}}",
+        "responseFormat": "file",
+        "options": {}
+      },
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2630,
+        220
+      ],
+      "typeVersion": 1,
+      "id": "d976831a-334d-4c07-9b79-90885abd8dca"
+    },
+    {
+      "parameters": {
+        "sourceData": "binary",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "next_button",
+              "cssSelector": "span.next > a",
+              "returnValue": "attribute",
+              "attribute": "href"
+            },
+            {
+              "key": "names",
+              "cssSelector": "td.table-name",
+              "returnArray": true
+            },
+            {
+              "key": "swifts",
+              "cssSelector": "td.table-swift",
+              "returnArray": true
+            },
+            {
+              "key": "cities",
+              "cssSelector": "td.table-city",
+              "returnArray": true
+            },
+            {
+              "key": "branches",
+              "cssSelector": "td.table-branch",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "HTML Extract1",
+      "type": "n8n-nodes-base.htmlExtract",
+      "position": [
+        3130,
+        70
+      ],
+      "typeVersion": 1,
+      "id": "375052d0-0218-4ff1-9090-60cac488fd15"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "swifts.meetup",
+        "fields": "iso_code,country,page,name,branch,city,swift_code,createdAt,updatedAt",
+        "options": {
+          "dateFields": "createdAt,updatedAt"
+        }
+      },
+      "name": "MongoDB1",
+      "type": "n8n-nodes-base.mongoDb",
+      "position": [
+        3660,
+        70
+      ],
+      "typeVersion": 1,
+      "id": "4c98c04f-ca65-456a-a024-165e3f6596a3",
+      "credentials": {
+        "mongoDb": {
+          "id": "6",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "group": "geographic",
+        "tool": "getCountryNormalized",
+        "country": "={{$node[\"SplitInBatches\"].json[\"country\"].replace(/[\\/0-9]/g, \"\")}}",
+        "language": "american",
+        "additionalOptions": {}
+      },
+      "name": "uProc",
+      "type": "n8n-nodes-base.uproc",
+      "position": [
+        1480,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "ecba2be2-101a-4682-9405-eb759d9e7973",
+      "credentials": {
+        "uprocApi": {
+          "id": "5",
+          "name": "uProc account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "var newItems = [];\n\nfor (i = 0; i < items[0].json.swifts.length; i++) {\n  var item = {\n    iso_code: $node['uProc'].json.message.code,\n    country: $node['SplitInBatches'].json.country.replace(/[-\\/0-9]/g, \"\"),\n    page: $node['Set Page to Scrape'].json.page,\n    name: items[0].json.names[i],\n    city: items[0].json.cities[i],\n    branch: items[0].json.branches[i],\n    swift_code: items[0].json.swifts[i],\n    createdAt: new Date(),\n    updatedAt: new Date()\n  }\n  newItems.push({json: item});\n}\n\nreturn newItems;\n\n"
+      },
+      "name": "Prepare Documents",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        3310,
+        70
+      ],
+      "typeVersion": 1,
+      "id": "af112b0b-afcf-4446-ad60-253ec39d6000"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"SplitInBatches\"].context[\"noItemsLeft\"] + \"\"}}",
+              "value2": "true"
+            }
+          ]
+        }
+      },
+      "name": "More Countries",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3190,
+        580
+      ],
+      "typeVersion": 1,
+      "id": "ef91b299-4683-4947-84af-15797c3e199c"
+    },
+    {
+      "parameters": {
+        "functionCode": "const staticData = getWorkflowStaticData('global');\n\nitem.page = \"\";\nif (staticData.page && staticData.page.length) {\n  item.page = staticData.page;\n} else {\n  item.page = $node['SplitInBatches'].json.country;\n}\nreturn item;\n"
+      },
+      "name": "Set Page to Scrape",
+      "type": "n8n-nodes-base.functionItem",
+      "position": [
+        1670,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "69baecc1-d925-44bd-93ad-191c5a8ddbee"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"more_pages\"] + \"\"}}",
+              "value2": "true"
+            }
+          ]
+        }
+      },
+      "name": "More Pages",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3450,
+        500
+      ],
+      "typeVersion": 1,
+      "id": "c564c595-463c-4556-b3cb-ebfdb4e834d3"
+    },
+    {
+      "parameters": {
+        "functionCode": "var next_page = $node['HTML Extract1'].json.next_button && $node['HTML Extract1'].json.next_button.length ? $node['HTML Extract1'].json.next_button : \"\";\nvar more_pages = next_page.length > 0;\nconst staticData = getWorkflowStaticData('global');\n\n//all current items are after date: needs pagination\nif (more_pages) {\n  staticData.page = next_page;\n} else {\n  //don't check more items in previous pages;\n  delete staticData.page;\n}\n\nreturn [\n  {\n    json: {\n      more_pages: more_pages\n    }\n  }\n];\n"
+      },
+      "name": "Set More Pages",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        3850,
+        70
+      ],
+      "typeVersion": 1,
+      "id": "c225a551-160a-448a-adf1-e2ed2e635ccb"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "url",
+              "value": "=https://www.theswiftcodes.com{{$node[\"Set Page to Scrape\"].json[\"page\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1820,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "4894bb4f-4395-4f81-b286-b9cbbf599da3"
+    },
+    {
+      "parameters": {
+        "functionCode": "var generateNameFromUrl = function(url){\n    return url.replace(/[^a-z0-9]/gi, \"_\");\n}\n\nitem.file = generateNameFromUrl(item.url) + \".html\"\nreturn item;"
+      },
+      "name": "Generate filename",
+      "type": "n8n-nodes-base.functionItem",
+      "position": [
+        1980,
+        90
+      ],
+      "typeVersion": 1,
+      "id": "aab23b6d-c528-4559-8144-55e0efe149ef"
+    },
+    {
+      "parameters": {
+        "filePath": "=/home/node/.cache/scrapper/{{$json[\"file\"]}}"
+      },
+      "name": "Read Binary File",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "position": [
+        2150,
+        90
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true,
+      "id": "5fd0678b-6775-4dd4-8cdc-12071f904487",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Read Binary File\"].binary.data.mimeType}}",
+              "value2": "text/html"
+            }
+          ]
+        }
+      },
+      "name": "File exists?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2330,
+        90
+      ],
+      "typeVersion": 1,
+      "id": "da8c6619-ce63-4f7f-9ae5-1afc89a209d1"
+    },
+    {
+      "parameters": {
+        "fileName": "=/Users/thangnguyen/projects/n8n/.cache/scrapper/{{$node[\"Generate filename\"].json[\"file\"]}}",
+        "dataPropertyName": "=data"
+      },
+      "name": "Write Binary File",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "position": [
+        2780,
+        220
+      ],
+      "typeVersion": 1,
+      "id": "666d0ede-8175-4b99-b623-399ebe145565"
+    },
+    {
+      "parameters": {
+        "filePath": "={{$json[\"fileName\"]}}"
+      },
+      "name": "Read Binary File1",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "position": [
+        2950,
+        70
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true,
+      "id": "401881b0-0685-41e8-a148-d50d704c7ae1",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "functionCode": "const waitTimeSeconds = 1;\n\nreturn new Promise((resolve) => {\n  setTimeout(() => {\n    resolve([]);\n  }, waitTimeSeconds * 1000);\n});\n"
+      },
+      "name": "Wait",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        2470,
+        220
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true,
+      "id": "2f578b8c-6685-45f8-b982-71a797e575ef",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "functionCode": "return items[0].json.countries.map(function(country) {\n  return {\n  json: {country: country}\n  }\n});"
+      },
+      "name": "Prepare countries",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        1080,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "770d5bf7-b166-42e6-a369-459333f34ad8"
+    },
+    {
+      "parameters": {
+        "command": "mkdir -p  /Users/thangnguyen/projects/n8n/.cache/scrapper/"
+      },
+      "name": "Create Directory",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [
+        450,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "05cc66a6-a2ad-41d7-af78-b4e623429143",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "collection": "swifts.meetup",
+        "options": {},
+        "query": "={\"swift_code\": \"{{$json[\"swift_code\"]}}\"}"
+      },
+      "name": "MongoDB",
+      "type": "n8n-nodes-base.mongoDb",
+      "position": [
+        3480,
+        0
+      ],
+      "executeOnce": false,
+      "typeVersion": 1,
+      "alwaysOutputData": true,
+      "id": "b0357ef5-1ddc-42b3-b0c8-c7032d769027",
+      "credentials": {
+        "mongoDb": {
+          "id": "6",
+          "name": "MongoDB account"
+        }
+      },
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Generate filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Create Directory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "uProc": {
+      "main": [
+        [
+          {
+            "node": "Set Page to Scrape",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB1": {
+      "main": [
+        [
+          {
+            "node": "Set More Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "More Pages": {
+      "main": [
+        [
+          {
+            "node": "Set Page to Scrape",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "More Countries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File exists?": {
+      "main": [
+        [
+          {
+            "node": "Read Binary File1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Extract": {
+      "main": [
+        [
+          {
+            "node": "Prepare countries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Extract1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Write Binary File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "More Countries": {
+      "main": [
+        [],
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set More Pages": {
+      "main": [
+        [
+          {
+            "node": "More Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches": {
+      "main": [
+        [
+          {
+            "node": "uProc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Directory": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Binary File": {
+      "main": [
+        [
+          {
+            "node": "File exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate filename": {
+      "main": [
+        [
+          {
+            "node": "Read Binary File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Documents": {
+      "main": [
+        [
+          {
+            "node": "MongoDB1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare countries": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Binary File1": {
+      "main": [
+        [
+          {
+            "node": "HTML Extract1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Binary File": {
+      "main": [
+        [
+          {
+            "node": "Read Binary File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Page to Scrape": {
+      "main": [
+        [
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-09-01T11:08:30.792Z",
+  "updatedAt": "2022-09-01T11:08:30.792Z",
+  "settings": {},
+  "staticData": null,
+  "pinData": {},
+  "tags": []
+}
