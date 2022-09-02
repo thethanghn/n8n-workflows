@@ -1,0 +1,350 @@
+{
+  "id": 10,
+  "name": "Multiple RSS to Telegram",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "position": [
+        240,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "4bed3aaa-e737-4d4b-b6dd-316ec7809801"
+    },
+    {
+      "parameters": {
+        "url": "={{$node[\"SplitInBatches\"].json[\"url\"]}}"
+      },
+      "name": "RSS Feed Read",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [
+        1120,
+        460
+      ],
+      "typeVersion": 1,
+      "id": "9a4f0d0b-d6d5-4bc6-a34b-fb918e4e4d94"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "name": "SplitInBatches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        900,
+        460
+      ],
+      "typeVersion": 1,
+      "id": "c53baccb-ef43-40a9-a142-a1a0abeb50da"
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 10,
+              "unit": "minutes"
+            }
+          ]
+        }
+      },
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "position": [
+        240,
+        460
+      ],
+      "typeVersion": 1,
+      "id": "d794b007-2f1f-4d3d-ad43-4465dc92f546"
+    },
+    {
+      "parameters": {
+        "functionCode": "const staticData = getWorkflowStaticData('global');\nconst newRSSIds = items.map(item => item.json[\"isoDate\"]);\nconst oldRSSIds = staticData.oldRSSIds; \n\nif (!oldRSSIds) {\n  staticData.oldRSSIds = newRSSIds;\n  return items;\n}\n\n\nconst actualNewRSSIds = newRSSIds.filter((id) => !oldRSSIds.includes(id));\nconst actualNewRSS = items.filter((data) => actualNewRSSIds.includes(data.json['isoDate']));\nstaticData.oldRSSIds = [...actualNewRSSIds, ...oldRSSIds];\n\nreturn actualNewRSS;\n"
+      },
+      "name": "only get new RSS",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        1340,
+        460
+      ],
+      "typeVersion": 1,
+      "id": "7d622a5d-c023-4128-851f-a8ac3a4582e7"
+    },
+    {
+      "parameters": {
+        "chatId": "431266578",
+        "text": "={{$json[\"title\"]}}\n{{$json[\"link\"]}}",
+        "additionalFields": {}
+      },
+      "name": "Telegram_IT",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1920,
+        940
+      ],
+      "typeVersion": 1,
+      "id": "27cf7a44-d66e-4fa1-9174-ee3d01aac507",
+      "credentials": {
+        "telegramApi": {
+          "id": "4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "431266578",
+        "text": "={{$json[\"title\"]}}\n{{$json[\"link\"]}}",
+        "additionalFields": {}
+      },
+      "name": "Telegram_Security",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1920,
+        700
+      ],
+      "typeVersion": 1,
+      "id": "6d81f3b3-bca3-4d7a-b51e-11efceb5f023",
+      "credentials": {
+        "telegramApi": {
+          "id": "4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "return [\n  {\n    json: {\n      url: 'https://feeds.feedburner.com/UnikosHardware',\n    }\n  },\n  {\n    json: {\n      url: 'http://feeds.feedburner.com/playpc',\n    }\n  },\n  {\n    json: {\n      url: 'https://lab.ocf.tw/feed/',\n    }\n  },\n  {\n    json: {\n      url: 'https://techcommunity.microsoft.com/plugins/custom/microsoft/o365/custom-blog-rss?tid=3754543230341459569&board=microsoft_365blog',\n    }\n  }\n];"
+      },
+      "name": "RSS Source",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        680,
+        460
+      ],
+      "typeVersion": 1,
+      "id": "a772d897-bb8c-4199-bba0-ab7258f4dcb7"
+    },
+    {
+      "parameters": {
+        "chatId": "431266578",
+        "text": "={{$json[\"title\"]}}\n{{$json[\"link\"]}}",
+        "additionalFields": {}
+      },
+      "name": "Telegram_M365",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1920,
+        440
+      ],
+      "typeVersion": 1,
+      "id": "3361d1f6-2bf7-4f85-855a-8ddd47f124ed",
+      "credentials": {
+        "telegramApi": {
+          "id": "4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"title\"]}}",
+              "operation": "regex",
+              "value2": "資安|資訊安全|安全|外洩|監控|威脅|漏洞|封鎖|修補|攻擊|入侵|個資|隱私|私密|騙|社交工程|釣魚|駭|Security|security|Secure|secure"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "name": "IF-2",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1580,
+        720
+      ],
+      "typeVersion": 1,
+      "id": "048c9485-464b-44a9-b6ee-db5a475ef538"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"link\"]}}",
+              "operation": "contains",
+              "value2": "techcommunity.microsoft.com"
+            }
+          ]
+        }
+      },
+      "name": "IF-1",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1580,
+        460
+      ],
+      "typeVersion": 1,
+      "id": "eaf2569e-aaf2-4d29-8a73-d06dc6bbdb0c"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Get the global workflow static data\nconst staticData = getWorkflowStaticData('global');\n// Update its data\nstaticData.oldRSSIds = new Date().getTime();\n// Delete data\ndelete staticData.oldRSSIds;\n\nreturn [\n  {\n    json: {}\n  }\n]"
+      },
+      "name": "Clear Function",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        460,
+        300
+      ],
+      "typeVersion": 1,
+      "id": "01a9b7a4-8c73-4267-a217-dea3d7be044e"
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "url": "https://www.inoreader.com/reader/api/0/subscription/list",
+        "allowUnauthorizedCerts": true,
+        "options": {}
+      },
+      "id": "0666fe4e-cc8b-4e0d-b0a2-e50b0ee0dc07",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        460,
+        460
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "oAuth2Api": {
+          "id": "12",
+          "name": "Inoreader credential"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF-1": {
+      "main": [
+        [
+          {
+            "node": "Telegram_M365",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF-2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF-2": {
+      "main": [
+        [
+          {
+            "node": "Telegram_Security",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram_IT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Source": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Read": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "only get new RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches": {
+      "main": [
+        [
+          {
+            "node": "RSS Feed Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "only get new RSS": {
+      "main": [
+        [
+          {
+            "node": "IF-1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "RSS Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-09-01T15:32:01.474Z",
+  "updatedAt": "2022-09-01T16:13:18.295Z",
+  "settings": {},
+  "staticData": null,
+  "pinData": {},
+  "tags": []
+}
